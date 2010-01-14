@@ -20,14 +20,19 @@ try:
 except ImportError:
     from StringIO import StringIO
 from xml.etree import ElementTree
+import warnings
 
 
-def UniprotIterator(handle,root_element='entry',return_raw_comments=False):
+def UniprotIterator(handle,root_element='entry',alphabet=Alphabet.ProteinAlphabet(),return_raw_comments=False, skip_parsing_errors=False):
     '''Generator Function
     parses an XML entry at a time from any UniProt XML file 
     returns a SeqRecord for each iteration
     
     This generator can be used in Bio.SeqIO
+    
+    return_raw_comments = True --> comment fields are returned as complete xml to allow further processing
+    skip_parsing_errors = True --> if parsing errors are found, skip to next entry
+    
     '''
     if not hasattr(handle, "read"):
         if type(handle)==type(''):
@@ -45,9 +50,12 @@ def UniprotIterator(handle,root_element='entry',return_raw_comments=False):
         if '</%s>'%root_element in line:
             write=False
             try:
-                yield Parser(''.join(single_entry),return_raw_comments=return_raw_comments).parse()
+                yield Parser(''.join(single_entry),alphabet=alphabet,return_raw_comments=return_raw_comments).parse()
             except Exception,error:
-                raise ValueError('Error in parsing xml format: %s'%error)
+                if skip_parsing_errors:
+                    warnings.warn('Error in parsing xml format: %s'%error)
+                else:
+                    raise ValueError('Error in parsing xml format: %s'%error)
 
     return 
 
