@@ -16,8 +16,28 @@ try:
     from cStringIO import StringIO
 except ImportError:
     from StringIO import StringIO
-from xml.etree import ElementTree
 import warnings
+try:
+    from xml.etree import cElementTree as ElementTree
+except ImportError:
+    try:
+        from xml.etree import ElementTree as ElementTree
+    except ImportError:
+        # Python 2.4 -- check for 3rd-party implementations
+        try:
+            from lxml.etree import ElementTree
+        except ImportError:
+            try:
+                import cElementTree as ElementTree
+            except ImportError:
+                try:
+                    from elementtree import ElementTree
+                except ImportError:
+                    from Bio import MissingExternalDependencyError
+                    raise MissingExternalDependencyError(
+                            "No ElementTree module was found. "
+                            "Use Python 2.5+, lxml or elementtree if you "
+                            "want to use Bio.SeqIO.UniprotIO.")
 
 
 def UniprotIterator(handle,root_element='entry',alphabet=Alphabet.ProteinAlphabet(),return_raw_comments=False, skip_parsing_errors=False):
@@ -46,13 +66,14 @@ def UniprotIterator(handle,root_element='entry',alphabet=Alphabet.ProteinAlphabe
             single_entry.append(line)
         if '</%s>'%root_element in line:
             write=False
-            try:
-                yield Parser(''.join(single_entry),alphabet=alphabet,return_raw_comments=return_raw_comments).parse()
-            except Exception,error:
-                if skip_parsing_errors:
-                    warnings.warn('Error in parsing xml format: %s'%error)
-                else:
-                    raise ValueError('Error in parsing xml format: %s'%error)
+            yield Parser(''.join(single_entry),alphabet=alphabet,return_raw_comments=return_raw_comments).parse()
+#            try:
+#                yield Parser(''.join(single_entry),alphabet=alphabet,return_raw_comments=return_raw_comments).parse()
+#            except Exception,error:
+#                if skip_parsing_errors:
+#                    warnings.warn('Error in parsing xml format: %s'%error)
+#                else:
+#                    raise ValueError('Error in parsing xml format: %s'%error,Exception.args)
 
     return 
 
@@ -267,14 +288,16 @@ class Parser():
                 ann_key='_'.join((element.tag,element.attrib['type'].replace(' ','')))
                 for loc_element in element.getiterator('location'):
                     pos_els=loc_element.getiterator('position')
-                    if pos_els:
-                        start=end=int(pos_els[0].attrib['position'])-1
-                    else:
-                        try:
-                            start=int(loc_element.getiterator('begin')[0].attrib['position'])-1
-                            end=int(loc_element.getiterator('end')[0].attrib['position'])-1
-                        except KeyError:#undefined positions
-                            start=end=0    
+                    pos_els=list(pos_els)
+                    # this try should be avoided, maybe it is safer to skip postion parsing for mass spectrometry
+                    try:
+                        if pos_els:
+                            start=end=int(pos_els[0].attrib['position'])-1
+                        else:
+                                start=int(loc_element.getiterator('begin')[0].attrib['position'])-1
+                                end=int(loc_element.getiterator('end')[0].attrib['position'])-1
+                    except :#undefined positions or erroneusly mapped
+                        start=end=0    
                 mass=element.attrib['mass']
                 method=element.attrib['mass']
                 if start==end==0:  
