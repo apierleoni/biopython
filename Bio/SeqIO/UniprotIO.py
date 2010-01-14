@@ -137,6 +137,7 @@ class Parser():
             append_to_annotations(element.tag,element.attrib['type'])
         
         def _parse_organism(element):
+            com_name=sci_name=''
             for organism_element in element.getchildren():  
                 if organism_element.tag=='name':
                     if organism_element.attrib['type']== 'scientific':
