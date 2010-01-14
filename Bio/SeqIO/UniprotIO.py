@@ -1,13 +1,10 @@
 '''
-Created on 04/dic/2009
-
-@author: andreapierleoni
+author: Andrea Pierleoni
 
 
-Bio.UniprotIO support for the "uniprot" (aka UniProt XML) file format.
+Bio.SeqIO.UniprotIO support for the "uniprot" (aka UniProt XML) file format.
 
 You are expected to use this module via the Bio.SeqIO functions.
-
 
 '''
 
@@ -61,9 +58,9 @@ def UniprotIterator(handle,root_element='entry',alphabet=Alphabet.ProteinAlphabe
 
 
 class Parser():
-    '''parse a UniProt XML entry to a SeqRecord
+    '''Parse a UniProt XML entry to a SeqRecord
     return_raw_comments=True to get back the complete comment field in XML format
-    alphabet=ProteinAlphabet()    can be modified if needed, default is protein alphabet.
+    alphabet=Alphabet.ProteinAlphabet()    can be modified if needed, default is protein alphabet.
     '''
     
     def __init__(self,xml_entry,alphabet=Alphabet.ProteinAlphabet(),return_raw_comments=False):
@@ -81,7 +78,7 @@ class Parser():
             self.dom=ElementTree.parse(self.raw_xml)
             self.entry=self.dom.getroot()
             if self.entry.tag!='entry':
-                raise Exception('Malformed XML, the root should be an "entry" tag')
+                raise Exception('Malformed XML, root element should be an "entry" tag')
             self.validated=True
         except:
             self.validated=False
@@ -179,17 +176,13 @@ class Parser():
         def _parse_comment(element):
             '''Comment fields are very heterogeneus. each type has his own (frequently mutated) schema.
             To store all the contained data, more complex data structures are needed, such as 
-            annidated dictionaires, but this is ledft to to end user.
-            By optionally setting:
+            annidated dictionaries. This is left to end user, by optionally setting:
             
             return_raw_comments=True 
             
             the orginal XMLs is returned in the annotation fields.
-            Note that this will behave badly when saving the seqrecord as genbank format.
             
-            Comment type specific parsers (even partial) should be included
-            
-            comment types:
+            available comment types at december 2009:
                 "allergen"
                 "alternative products"
                 "biotechnology"
