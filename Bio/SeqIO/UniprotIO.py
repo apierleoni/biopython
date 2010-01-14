@@ -90,7 +90,7 @@ class Parser():
             return None
         
         
-        self.ParsedSeqRecord=SeqRecord('')    
+   
         
         def append_to_annotations(key,value):
             if not self.ParsedSeqRecord.annotations.has_key(key):
@@ -99,14 +99,18 @@ class Parser():
                 self.ParsedSeqRecord.annotations[key].append(value)
             
         def _parse_name(element):
-            '''use name as id'''
-            self.ParsedSeqRecord.id=element.text
+            '''use name as name'''
+            self.ParsedSeqRecord.name=element.text
             '''add name to dbxrefs'''
             self.ParsedSeqRecord.dbxrefs.append(self.dbname+':'+element.text)
         
         def _parse_accession(element):
+            '''use first accession as id'''
+            if not self.ParsedSeqRecord.id:
+                self.ParsedSeqRecord.id=element.text
             '''add accessions to dbxrefs'''
             self.ParsedSeqRecord.dbxrefs.append(self.dbname+':'+element.text)
+            #should accession be added to annotations?
         
         def _parse_protein(element):
             '''Parse protein names'''
@@ -238,8 +242,7 @@ class Parser():
                             "tissue specificity",
                             "toxic dose",
                              ]
-            
-            
+
             if element.attrib['type'] in simple_comments:
                 ann_key='_'.join((element.tag,element.attrib['type'].replace(' ','')))
                 for text_element in element.getiterator('text'):
@@ -396,6 +399,9 @@ class Parser():
             self.ParsedSeqRecord.seq=Seq.Seq(seq,self.alphabet)
             
         #============================================#
+        '''Initialize SeqRecord '''
+        self.ParsedSeqRecord=SeqRecord('',id='') 
+        
         '''Entry attribs parsing '''
         if self.entry.attrib.has_key('dataset'):
             self.dbname=self.entry.attrib['dataset']
