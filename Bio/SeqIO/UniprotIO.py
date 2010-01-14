@@ -268,12 +268,11 @@ class Parser():
                 for loc_element in element.getiterator('location'):
                     pos_els=loc_element.getiterator('position')
                     if pos_els:
-                        start=int(pos_els[0].attrib['position'])
-                        end=start
+                        start=end=int(pos_els[0].attrib['position'])-1
                     else:
                         try:
-                            start=int(loc_element.getiterator('begin')[0].attrib['position'])
-                            end=int(loc_element.getiterator('end')[0].attrib['position'])
+                            start=int(loc_element.getiterator('begin')[0].attrib['position'])-1
+                            end=int(loc_element.getiterator('end')[0].attrib['position'])-1
                         except KeyError:#undefined positions
                             start=end=0    
                 mass=element.attrib['mass']
@@ -366,14 +365,14 @@ class Parser():
                     try:
                         position_elements=feature_element.findall('position')
                         if position_elements:
-                            position=int(position_elements[0].attrib['position'])
+                            position=int(position_elements[0].attrib['position'])-1
                             feature.location=SeqFeature.FeatureLocation(position,position)
                         else:
                             start_positions_elements=feature_element.findall('begin')
                             end_positions_elements=feature_element.findall('end')
                             if start_positions_elements and end_positions_elements:
-                                start_position=int(start_positions_elements[0].attrib['position'])
-                                end_position=int(end_positions_elements[0].attrib['position'])
+                                start_position=int(start_positions_elements[0].attrib['position'])-1
+                                end_position=int(end_positions_elements[0].attrib['position'])-1
                                 feature.location=SeqFeature.FeatureLocation(start_position,end_position)
                     except:
                         pass#skip if parsing error    
