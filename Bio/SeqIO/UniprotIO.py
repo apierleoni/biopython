@@ -448,8 +448,8 @@ class Parser():
             else:
                 pass   
             
-        self.ParsedSeqRecord.dbxref=list(set(self.ParsedSeqRecord.dbxrefs))#remove duplicate dbxref
-        self.ParsedSeqRecord.dbxref.sort()
+        self.ParsedSeqRecord.dbxrefs=list(set(self.ParsedSeqRecord.dbxrefs))#remove duplicate dbxrefs
+        self.ParsedSeqRecord.dbxrefs.sort()
         
         return self.ParsedSeqRecord
         
