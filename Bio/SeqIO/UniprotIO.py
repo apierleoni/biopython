@@ -106,7 +106,7 @@ class Parser():
 
         
     def parse(self):
-        
+        '''parse the input '''
         if not self.validated:
             return None
         
@@ -131,7 +131,8 @@ class Parser():
                 self.ParsedSeqRecord.id=element.text
             '''add accessions to dbxrefs'''
             self.ParsedSeqRecord.dbxrefs.append(self.dbname+':'+element.text)
-            #should accession be added to annotations?
+            '''add accessions to annotations'''#to cope with swissProt plain text parser
+            append_to_annotations('accessions',element.text)
         
         def _parse_protein(element):
             '''Parse protein names'''
