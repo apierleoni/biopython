@@ -148,7 +148,7 @@ class Parser():
                             self.ParsedSeqRecord.description=rec_name.text
                             descr_set=True
                         elif (rec_name.tag=='shortName') and not name_set:
-                            self.ParsedSeqRecord.name=rec_name.text
+                            #self.ParsedSeqRecord.name=rec_name.text
                             name_set=True
                 elif protein_element.tag=='component':
                     pass #not parsed 
