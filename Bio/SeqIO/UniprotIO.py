@@ -333,14 +333,23 @@ class Parser():
             for ref_element in element.getchildren():
                 if ref_element.tag=='citation':
                     pub_type=ref_element.attrib['type']
+                    if pub_type=='submission':
+                        pub_type+=' to the '+ref_element.attrib['db']
                     if ref_element.attrib.has_key('name'):
                         journal_name=ref_element.attrib['name']
-                    else:
-                        journal_name=''
+                    else: journal_name=''
                     if ref_element.attrib.has_key('date'):
                         pub_date=ref_element.attrib['date']
-                    else:
-                        pub_date=''
+                    else: pub_date=''
+                    if ref_element.attrib.has_key('volume'):
+                        j_volume=ref_element.attrib['volume']
+                    else: j_volume=''
+                    if ref_element.attrib.has_key('first'):
+                        j_first=ref_element.attrib['first']
+                    else: j_first=''
+                    if ref_element.attrib.has_key('last'):
+                        j_last=ref_element.attrib['last']
+                    else: j_last=''
                     for cit_element in ref_element.getchildren():
                         if cit_element.tag=='title':
                             reference.title=cit_element.text
@@ -351,24 +360,26 @@ class Parser():
                             self.ParsedSeqRecord.dbxrefs.append(cit_element.attrib['type']+':'+cit_element.attrib['id'])
                             if cit_element.attrib['type']=='PubMed':
                                 reference.pubmed_id=cit_element.attrib['id']
-                            if ref_element.attrib['type']=='MEDLINE':
+                            elif cit_element.attrib['type']=='MEDLINE':
                                 reference.medline_id=cit_element.attrib['id']
                 elif ref_element.tag=='scope':
                     scopes.append(ref_element.text)
-                elif ref_element.tag=='tissue':
-                    tissues.append(ref_element.text)
+                elif ref_element.tag=='source':
+                    for source_element in ref_element.getchildren():
+                        if source_element.tag=='tissue':
+                            tissues.append(source_element.text)
             if scopes:
-                scopes_str='Scopes: '+', '.join(scopes)
-            else:
-                scopes_str=''
+                scopes_str='Scope: '+', '.join(scopes)
+            else: scopes_str=''
             if tissues:
-                tissues_str='Tissues: '+', '.join(tissues)
-            else:
-                tissues_str=''
+                tissues_str='Tissue: '+', '.join(tissues)
+            else: tissues_str=''
             
             reference.location = [] #locations cannot be parsed since they are actually written in free text inside scopes so all the references are put in the annotation.
             reference.authors = ', '.join(authors) 
-            reference.journal = journal_name 
+            if pub_date and j_volume and j_first and j_last:
+                reference.journal = journal_name + ' ' + '%s:%s-%s(%s).'%(j_volume,j_first,j_last,pub_date)
+            else: reference.journal = journal_name 
             reference.comment = ' | '.join((pub_type,pub_date,scopes_str,tissues_str))
             append_to_annotations('references',reference)
             
@@ -432,7 +443,8 @@ class Parser():
             self.dbname='UnknownDataset'#this should not happen!
         '''add attribs to annotations '''
         for k,v in self.entry.attrib.items():
-            ann_key='_'.join((self.entry.tag,k))
+            #ann_key='_'.join((self.entry.tag,k))
+            ann_key=k
             self.ParsedSeqRecord.annotations[ann_key]=v
 
         '''Top-to-bottom entry children parsing '''
