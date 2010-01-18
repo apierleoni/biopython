@@ -137,7 +137,6 @@ class Parser():
         def _parse_protein(element):
             '''Parse protein names'''
             descr_set=False
-            name_set=False
             for protein_element in element.getchildren():
                 if protein_element.tag in ['recommendedName','alternativeName']:#recommendedName tag are parsed before
                     '''use protein fields for name and description '''
@@ -147,9 +146,6 @@ class Parser():
                         if (rec_name.tag=='fullName') and not descr_set:
                             self.ParsedSeqRecord.description=rec_name.text
                             descr_set=True
-                        elif (rec_name.tag=='shortName') and not name_set:
-                            #self.ParsedSeqRecord.name=rec_name.text
-                            name_set=True
                 elif protein_element.tag=='component':
                     pass #not parsed 
                 elif protein_element.tag=='domain':
