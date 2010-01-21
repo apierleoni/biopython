@@ -23,7 +23,7 @@ except ImportError:
     from StringIO import StringIO
 import warnings
 try:
-    from xml.etree import cElementTree as ElementTree
+    from xml.etree import ElementTree as ElementTree
 except ImportError:
     try:
         from xml.etree import ElementTree as ElementTree
@@ -239,37 +239,37 @@ class Parser():
 
             if element.attrib['type'] in simple_comments:
                 ann_key='comment_%s' % element.attrib['type'].replace(' ','')
-                for text_element in element.getiterator('text'):
+                for text_element in element.getiterator(NS + 'text'):
                     if text_element.text:
                         append_to_annotations(ann_key,text_element.text)
             elif element.attrib['type']=='subcellular location':
-                for subloc_element in element.getiterator('subcellularLocation'):
+                for subloc_element in element.getiterator(NS + 'subcellularLocation'):
                     for el in subloc_element.getchildren():
                         if el.text:
                             ann_key='comment_%s_%s' % (element.attrib['type'].replace(' ',''), el.tag.replace(NS,''))
                             append_to_annotations(ann_key,el.text)
             elif element.attrib['type']=='interaction':
-                for interact_element in element.getiterator('interactant'):
+                for interact_element in element.getiterator(NS +'interactant'):
                     ann_key='comment_%s_intactId' % element.attrib['type']
                     append_to_annotations(ann_key,interact_element.attrib['intactId'])
             elif element.attrib['type']=='alternative products':
-                for alt_element in element.getiterator('isoform'):
+                for alt_element in element.getiterator(NS +'isoform'):
                     ann_key='comment_%s_isoform' % element.attrib['type'].replace(' ','')
-                    for id_element in alt_element.getiterator('id'):
+                    for id_element in alt_element.getiterator(NS +'id'):
                         append_to_annotations(ann_key,id_element.text)
             elif element.attrib['type']=='mass spectrometry':
                 ann_key='comment_%s' % element.attrib['type'].replace(' ','')
                 start=end=0
-                for loc_element in element.getiterator('location'):
-                    pos_els=loc_element.getiterator('position')
+                for loc_element in element.getiterator(NS +'location'):
+                    pos_els=loc_element.getiterator(NS +'position')
                     pos_els=list(pos_els)
                     # this try should be avoided, maybe it is safer to skip postion parsing for mass spectrometry
                     try:
                         if pos_els:
                             start=end=int(pos_els[0].attrib['position'])-1
                         else:
-                                start=int(loc_element.getiterator('begin')[0].attrib['position'])-1
-                                end=int(loc_element.getiterator('end')[0].attrib['position'])-1
+                                start=int(loc_element.getiterator(NS +'begin')[0].attrib['position'])-1
+                                end=int(loc_element.getiterator(NS +'end')[0].attrib['position'])-1
                     except :#undefined positions or erroneusly mapped
                         pass    
                 mass=element.attrib['mass']
@@ -281,9 +281,9 @@ class Parser():
             elif element.attrib['type']=='sequence caution':
                 pass#not parsed: few information, complex structure
             elif element.attrib['type']=='online information':
-                for link_element in element.getiterator('link'):
+                for link_element in element.getiterator(NS +'link'):
                     ann_key='comment_%s' % element.attrib['type'].replace(' ','')
-                    for id_element in link_element.getiterator('link'):
+                    for id_element in link_element.getiterator(NS +'link'):
                         append_to_annotations(ann_key,'%s@%s'%(element.attrib['name'],link_element.attrib['uri']))            
             
             '''return raw XML comments if needed '''
