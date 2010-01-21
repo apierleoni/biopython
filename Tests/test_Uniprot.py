@@ -2,10 +2,13 @@
 """Test for the Uniprot parser on Uniprot XML files.
 """
 import os
+import copy
 import unittest
 
 from Bio import SeqIO
 from Bio.SeqRecord import SeqRecord
+
+from seq_tests_common import compare_records
 
 class TestUniprot(unittest.TestCase):
 
@@ -62,6 +65,13 @@ class TestUniprot(unittest.TestCase):
         self.assertEqual(seq_record.annotations['recommendedName_fullName'], ['Uncharacterized protein 043L'])
         self.assertEqual(seq_record.annotations['sequence_version'], 1)
         self.assertEqual(seq_record.annotations['proteinExistence'], ['Predicted'])
+
+    def test_Q13639(self):
+        up_filename = "Uniprot/Q13639.xml"
+        sp_filename = "SwissProt/Q13639.txt"
+        up_records = list(SeqIO.parse(open(up_filename),'uniprot'))
+        sp_records = list(SeqIO.parse(open(sp_filename),'swiss'))
+        compare_records(sp_records, up_records)
 
 if __name__ == "__main__":
     runner = unittest.TextTestRunner(verbosity = 2)
