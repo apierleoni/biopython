@@ -432,9 +432,14 @@ class Parser():
         '''add attribs to annotations '''
         for k, v in self.entry.attrib.items():
             if k in ("version"):
-                self.ParsedSeqRecord.annotations["entry_%s" % k] = int(v)
+                '''original'''
+                #self.ParsedSeqRecord.annotations["entry_%s" % k] = int(v)
+                '''to cope with swissProt plain text parser. this can cause errors 
+                if the attrib has the same name of an other annotation'''
+                self.ParsedSeqRecord.annotations[k] = int(v)
             else:
-                self.ParsedSeqRecord.annotations["entry_%s" % k] = v
+                #self.ParsedSeqRecord.annotations["entry_%s" % k] = v
+                self.ParsedSeqRecord.annotations[k] = v # to cope with swissProt plain text parser
 
         '''Top-to-bottom entry children parsing '''
         for element in self.entry.getchildren():
