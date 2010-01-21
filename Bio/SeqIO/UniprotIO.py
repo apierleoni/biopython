@@ -259,6 +259,7 @@ class Parser():
                         append_to_annotations(ann_key,id_element.text)
             elif element.attrib['type']=='mass spectrometry':
                 ann_key='comment_%s' % element.attrib['type'].replace(' ','')
+                start=end=0
                 for loc_element in element.getiterator('location'):
                     pos_els=loc_element.getiterator('position')
                     pos_els=list(pos_els)
@@ -270,7 +271,7 @@ class Parser():
                                 start=int(loc_element.getiterator('begin')[0].attrib['position'])-1
                                 end=int(loc_element.getiterator('end')[0].attrib['position'])-1
                     except :#undefined positions or erroneusly mapped
-                        start=end=0    
+                        pass    
                 mass=element.attrib['mass']
                 method=element.attrib['mass']
                 if start==end==0:  
