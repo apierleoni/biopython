@@ -30,6 +30,7 @@ nucleotide_alphas = [Alphabet.generic_nucleotide,
 no_alpha_formats = ["fasta","clustal","phylip","tab","ig","stockholm","emboss",
                     "fastq","fastq-solexa","fastq-illumina","qual"]
 possible_unknown_seq_formats = ["qual", "genbank", "gb", "embl"]
+no_empty_files = ["uniprot"]
 
 #List of formats including alignment only file formats we can read AND write.
 #The list is initially hard coded to preserve the original order of the unit
@@ -184,6 +185,9 @@ test_files = [ \
     ("fastq-illumina", False,'Quality/illumina_faked.fastq', 1),
     ("fastq-solexa", False, 'Quality/solexa_faked.fastq', 1),
     ("fastq-solexa", True, 'Quality/solexa_example.fastq', 5),
+#Following examples are also used in test_Uniprot.py
+    ("uniprot",  False, 'Uniprot/uni001', 1),
+    ("uniprot",  False, 'Uniprot/uni002', 3),
     ]
 
 # This is a list of two-tuples.  Each tuple contains a
@@ -295,10 +299,10 @@ def check_simple_write_read(records, indent=" "):
            #rather long, and it seems a bit pointless to record them.
            continue
         print indent+"Checking can write/read as '%s' format" % format
-        
+
         #Going to write to a handle...
         handle = StringIO()
-        
+
         try:
             c = SeqIO.write(sequences=records, handle=handle, format=format)
             assert c == len(records)
@@ -370,9 +374,10 @@ def check_simple_write_read(records, indent=" "):
 
 #Check parsers can cope with an empty file
 for t_format in SeqIO._FormatToIterator:
-    handle = StringIO()
-    records = list(SeqIO.parse(handle, t_format))
-    assert len(records) == 0
+    if not t_format in no_empty_files:
+        handle = StringIO()
+        records = list(SeqIO.parse(handle, t_format))
+        assert len(records) == 0
 
 for (t_format, t_alignment, t_filename, t_count) in test_files:
     print "Testing reading %s format file %s" % (t_format, t_filename)
