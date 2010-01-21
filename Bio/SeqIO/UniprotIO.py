@@ -109,7 +109,7 @@ class Parser():
             self.ParsedSeqRecord.dbxrefs.append(self.dbname+':'+element.text)
         
         def _parse_accession(element):
-            self.ParsedSeqRecord.accessions.append(element.text)
+            append_to_annotations('accessions', element.text)# to cope with SwissProt plain text parser
             '''add accessions to dbxrefs'''
             self.ParsedSeqRecord.dbxrefs.append(self.dbname+':'+element.text)
         
@@ -422,7 +422,6 @@ class Parser():
         #============================================#
         '''Initialize SeqRecord '''
         self.ParsedSeqRecord=SeqRecord('', id='') 
-        self.ParsedSeqRecord.accessions = []
         
         '''Entry attribs parsing '''
         if self.entry.attrib.has_key('dataset'):
@@ -481,10 +480,9 @@ class Parser():
 
         # use first accession as id
         if not self.ParsedSeqRecord.id:
-            self.ParsedSeqRecord.id=self.ParsedSeqRecord.accessions[0]
+            self.ParsedSeqRecord.id=self.ParsedSeqRecord.annotations['accessions'][0]
 
-        # add accessions to annotations'''#to cope with swissProt plain text parser
-        self.ParsedSeqRecord.annotations['accessions'] = self.ParsedSeqRecord.accessions
+
         
         return self.ParsedSeqRecord
         
