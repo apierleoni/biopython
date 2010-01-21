@@ -28,7 +28,7 @@ class TestUniprot(unittest.TestCase):
         self.assertEqual(seq_record.description, "Uncharacterized protein 043L")
         self.assertEqual(repr(seq_record.seq), "Seq('MDLINNKLNIEIQKFCLDLEKKYNINYNNLIDLWFNKESTERLIKCEVNLENKI...IPI', ProteinAlphabet())")
 
-        self.assertEqual(seq_record.accessions, ['Q91G55'])
+        # self.assertEqual(seq_record.accessions, ['Q91G55']) #seq_record.accessions does not exist
         # self.assertEqual(seq_record.organism_classification, ['Eukaryota', 'Metazoa', 'Chordata', 'Craniata', 'Vertebrata', 'Mammalia', 'Eutheria', 'Primates', 'Catarrhini', 'Hominidae', 'Homo'])
         # self.assertEqual(record.seqinfo, (348, 39676, '75818910'))
     
@@ -46,17 +46,17 @@ class TestUniprot(unittest.TestCase):
 
         self.assertEqual(seq_record.annotations['sequence_length'], 116)
         self.assertEqual(seq_record.annotations['sequence_checksum'], '4A29B35FB716523C')
-        self.assertEqual(seq_record.annotations['entry_modified'], '2009-07-07')
+        self.assertEqual(seq_record.annotations['modified'], '2009-07-07')
         self.assertEqual(seq_record.annotations['accessions'], ['Q91G55'])
         self.assertEqual(seq_record.annotations['taxonomy'], ['Viruses', 'dsDNA viruses, no RNA stage', 'Iridoviridae', 'Iridovirus'])
         self.assertEqual(seq_record.annotations['sequence_mass'], 13673)
-        self.assertEqual(seq_record.annotations['entry_dataset'], 'Swiss-Prot')
+        self.assertEqual(seq_record.annotations['dataset'], 'Swiss-Prot')
         self.assertEqual(seq_record.annotations['gene_name_ORF'], ['IIV6-043L'])
-        self.assertEqual(seq_record.annotations['entry_version'], 21)
+        self.assertEqual(seq_record.annotations['version'], 21)
         self.assertEqual(seq_record.annotations['sequence_modified'], '2001-12-01')
         self.assertEqual(seq_record.annotations['keywords'], ['Complete proteome', 'Virus reference strain'])
         self.assertEqual(seq_record.annotations['organismHost_name'], ['Acheta domesticus', 'House cricket', 'Chilo suppressalis', 'striped riceborer', 'Gryllus bimaculatus', 'Two-spotted cricket', 'Gryllus campestris', 'Spodoptera frugiperda', 'Fall armyworm'])
-        self.assertEqual(seq_record.annotations['entry_created'], '2009-06-16')
+        self.assertEqual(seq_record.annotations['created'], '2009-06-16')
         self.assertEqual(seq_record.annotations['organism_name'], ['Chilo iridescent virus'])
         self.assertEqual(seq_record.annotations['organism'], 'Invertebrate iridescent virus 6 (IIV-6)')
         self.assertEqual(seq_record.annotations['recommendedName_fullName'], ['Uncharacterized protein 043L'])
