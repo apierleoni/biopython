@@ -388,13 +388,21 @@ class Parser():
                             feature.location=SeqFeature.FeatureLocation(position,position)
                         else:
                             start_positions_elements=feature_element.findall(NS + 'begin')
+                            
+                            if start_positions_elements:
+                                if start_positions_elements[0].attrib.has_key('position'):
+                                    start_position=int(start_positions_elements[0].attrib['position'])-1
+                                elif start_positions_elements[0].attrib.has_key('status'):#fuzzy location
+                                    return #skip feature with unparsable position
                             end_positions_elements=feature_element.findall(NS + 'end')
-                            if start_positions_elements and end_positions_elements:
-                                start_position=int(start_positions_elements[0].attrib['position'])-1
-                                end_position=int(end_positions_elements[0].attrib['position'])-1
-                                feature.location=SeqFeature.FeatureLocation(start_position,end_position)
+                            if end_positions_elements:
+                                if end_positions_elements[0].attrib.has_key('position'):
+                                    end_position=int(end_positions_elements[0].attrib['position'])-1
+                                elif end_positions_elements[0].attrib.has_key('status'):#fuzzy location
+                                    return #skip feature with unparsable position
+                            feature.location=SeqFeature.FeatureLocation(start_position,end_position)
                     except:
-                        pass#skip if parsing error    
+                        return #skip feature with unparsable position
                 else:
                     try:
                         feature.qualifiers[feature_element.tag.replace(NS,'')]=feature_element.text
