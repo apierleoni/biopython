@@ -520,7 +520,10 @@ class DatabaseLoader:
         if "gi" in record.annotations:
             identifier = record.annotations["gi"]
         else:
-            identifier = record.id
+            if len(record.id) <= 40:
+                identifier = record.id
+            else:
+                identifier = None
 
         #Allow description and division to default to NULL as in BioPerl.
         description = getattr(record, 'description', None)
