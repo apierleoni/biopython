@@ -24,6 +24,7 @@ from Bio.Align.Generic import Alignment
 from Interfaces import AlignmentIterator
 from Bio.Alphabet import single_letter_alphabet, generic_dna, generic_protein
 from Bio.Alphabet import Gapped
+import warnings
 
 
 class FastaM10Iterator(AlignmentIterator):
@@ -217,12 +218,15 @@ class FastaM10Iterator(AlignmentIterator):
         #They appear to just shift the origin used in the calculation of the coordinates.
         
         if len(query_align_seq) != len(match_align_seq):
-            raise ValueError("Problem parsing the alignment sequence coordinates, " 
-                             "following should be the same length but are not:\n"
-                             "%s - len %i\n%s - len %i" % (query_align_seq,
-                                                           len(query_align_seq),
-                                                           match_align_seq,
-                                                           len(match_align_seq)))
+            pass
+            #THIS IS NOT TRUE FOR GLSEARCH!!!
+            #original biopython code:
+            #raise ValueError("Problem parsing the alignment sequence coordinates, " 
+            #                 "following should be the same length but are not:\n"
+            #                 "%s - len %i\n%s - len %i" % (query_align_seq,
+            #                                               len(query_align_seq),
+            #                                               match_align_seq,
+            #                                               len(match_align_seq)))
         if "sw_overlap" in alignment_annotation:
             if int(alignment_annotation["sw_overlap"]) != len(query_align_seq):
                 raise ValueError("Specified sw_overlap = %s does not match expected value %i" \
