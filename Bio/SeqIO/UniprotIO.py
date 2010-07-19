@@ -23,7 +23,7 @@ except ImportError:
     from StringIO import StringIO
 import warnings
 try:
-    from xml.etree import ElementTree as ElementTree
+    from xml.etree import cElementTree as ElementTree
 except ImportError:
     try:
         from xml.etree import ElementTree as ElementTree
@@ -63,13 +63,12 @@ def UniprotIterator(handle, alphabet=Alphabet.ProteinAlphabet(), return_raw_comm
         if isinstance(alphabet.alphabet, Alphabet.NucleotideAlphabet):
             raise ValueError, "Wrong alphabet %r" % alphabet
 
-    """
     if not hasattr(handle, "read"):
         if type(handle)==type(''):
             handle=StringIO(handle)
         else:
             raise Exception('An XML-containing handler or an XML string must be passed')
-    """
+
     for event, elem in ElementTree.iterparse(handle, events=("start", "end")):
         if event=="end" and elem.tag == NS + "entry":
             try:
@@ -294,10 +293,45 @@ class Parser():
         
         def _parse_dbReference(element):
             self.ParsedSeqRecord.dbxrefs.append(element.attrib['type']+':'+element.attrib['id'])
+            '''<dbReference type="PDB" key="11" id="2GEZ">
+               <property value="X-ray" type="method"/>
+               <property value="2.60 A" type="resolution"/>
+               <property value="A/C/E/G=1-192, B/D/F/H=193-325" type="chains"/>
+             </dbReference>'''
+            if 'type' in element.attrib:
+                if element.attrib['type'] == 'PDB':
+                        method=""
+                        resolution=""
+                        for ref_element in element.getchildren():  
+                            if ref_element.tag==NS + 'property':
+                                dat_type=ref_element.attrib['type']
+                                if dat_type=='method':
+                                    method=ref_element.attrib['value']
+                                if dat_type=='resolution':
+                                    resolution=ref_element.attrib['value']
+                                if dat_type=='chains':
+                                    pairs=ref_element.attrib['value'].split(',')
+                                    for elem in pairs:
+                                        pair=elem.strip().split('=')
+                                        if pair[1]!='-':
+                                            feature=SeqFeature.SeqFeature()
+                                            feature.type=element.attrib['type']
+                                            #feature.id=element.attrib['id']
+                                            feature.qualifiers['name']=element.attrib['id']
+                                            feature.qualifiers['method']=method
+                                            feature.qualifiers['resolution']=resolution
+                                            feature.qualifiers['chains']=pair[0].split('/')
+                                            start=int(pair[1].split('-')[0])-1
+                                            end=int(pair[1].split('-')[1])-1
+                                            feature.location=SeqFeature.FeatureLocation(start,end)
+                                            self.ParsedSeqRecord.features.append(feature)
+         
+                                            
+            
             for ref_element in  element.getchildren():  
                 if ref_element.tag==NS + 'property':
                     pass# this data cannot be fitted in a seqrecord object with a simple list. however at least ensembl and EMBL parsing can be improved to add entries in dbxrefs
-        
+            
         def _parse_reference(element):
             reference=SeqFeature.Reference()
             authors=[]
