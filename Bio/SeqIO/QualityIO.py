@@ -1,4 +1,4 @@
-# Copyright 2009 by Peter Cock.  All rights reserved.
+# Copyright 2009-2010 by Peter Cock.  All rights reserved.
 # This code is part of the Biopython distribution and governed by its
 # license.  Please see the LICENSE file that should have been included
 # as part of this package.
@@ -36,8 +36,15 @@ the allowed range of PHRED scores is 0 to 93 inclusive. The sequences and
 quality are then stored in pairs in a FASTA like format.
 
 Unfortunately there is no official document describing the FASTQ file format,
-and worse, several related but different variants exist.  Reasonable
-documentation exists at: http://maq.sourceforge.net/fastq.shtml
+and worse, several related but different variants exist. For more details,
+please read this open access publication:
+
+    The Sanger FASTQ file format for sequences with quality scores, and the
+    Solexa/Illumina FASTQ variants.
+    P.J.A.Cock (Biopython), C.J.Fields (BioPerl), N.Goto (BioRuby),
+    M.L.Heuer (BioJava) and P.M. Rice (EMBOSS).
+    Nucleic Acids Research 2010 38(6):1767-1771
+    http://dx.doi.org/10.1093/nar/gkp1137
 
 The good news is that Roche 454 sequencers can output files in the QUAL format,
 and sensibly they use PHREP style scores like Sanger.  Converting a pair of
@@ -51,7 +58,7 @@ own scoring system AND their own incompatible versions of the FASTQ format.
 Solexa/Illumina quality scores use Q = - 10 log10 ( Pe / (1-Pe) ), which can
 be negative.  PHRED scores and Solexa scores are NOT interchangeable (but a
 reasonable mapping can be achieved between them, and they are approximately
-equal for high quality reads).
+equal for higher quality reads).
 
 Confusingly early Solexa pipelines produced a FASTQ like file but using their
 own score mapping and an ASCII offset of 64. To make things worse, for the
@@ -353,14 +360,13 @@ approximately equal.
 """
 __docformat__ = "epytext en" #Don't just use plain text in epydoc API pages!
 
-#See also http://blog.malde.org/index.php/2008/09/09/the-fastq-file-format-for-sequences/
-
 from Bio.Alphabet import single_letter_alphabet
 from Bio.Seq import Seq, UnknownSeq
 from Bio.SeqRecord import SeqRecord
-from Interfaces import SequentialSequenceWriter
+from Bio.SeqIO.Interfaces import SequentialSequenceWriter
 from math import log
 import warnings
+
 # define score offsets. See discussion for differences between Sanger and
 # Solexa offsets.
 SANGER_SCORE_OFFSET = 33
@@ -443,17 +449,17 @@ def solexa_quality_from_phred(phred_quality):
     >>> print solexa_quality_from_phred(None)
     None
     """
-    if phred_quality > 0:
+    if phred_quality is None:
+        #Assume None is used as some kind of NULL or NA value; return None
+        #e.g. Bio.SeqIO gives Ace contig gaps a quality of None.
+        return None
+    elif phred_quality > 0:
         #Solexa uses a minimum value of -5, which after rounding matches a
         #random nucleotide base call.
         return max(-5.0, 10*log(10**(phred_quality/10.0) - 1, 10))
     elif phred_quality == 0:
         #Special case, map to -5 as discussed in the docstring
         return -5.0
-    elif phred_quality is None:
-        #Assume None is used as some kind of NULL or NA value; return None
-        #e.g. Bio.SeqIO gives Ace contig gaps a quality of None.
-        return None
     else:
         raise ValueError("PHRED qualities must be positive (or zero), not %s" \
                          % repr(phred_quality))
@@ -524,11 +530,11 @@ def _get_phred_quality(record):
                          % record.id)
 
 #Only map 0 to 93, we need to give a warning on truncating at 93
-_phred_to_sanger_quality_str = dict((qp, chr(min(126,qp+SANGER_SCORE_OFFSET))) \
+_phred_to_sanger_quality_str = dict((qp, chr(min(126, qp+SANGER_SCORE_OFFSET))) \
                                     for qp in range(0, 93+1))
 #Only map -5 to 93, we need to give a warning on truncating at 93
 _solexa_to_sanger_quality_str = dict( \
-    (qs, chr(min(126,int(round(phred_quality_from_solexa(qs)))+SANGER_SCORE_OFFSET))) \
+    (qs, chr(min(126, int(round(phred_quality_from_solexa(qs)))+SANGER_SCORE_OFFSET))) \
     for qs in range(-5, 93+1))
 def _get_sanger_quality_str(record):
     """Returns a Sanger FASTQ encoded quality string (PRIVATE).
@@ -611,7 +617,7 @@ def _get_sanger_quality_str(record):
         if max(qualities) >= 93.5:
             warnings.warn("Data loss - max PHRED quality 93 in Sanger FASTQ")
         #This will apply the truncation at 93, giving max ASCII 126
-        return "".join([chr(min(126,int(round(qp))+SANGER_SCORE_OFFSET)) \
+        return "".join([chr(min(126, int(round(qp))+SANGER_SCORE_OFFSET)) \
                         for qp in qualities])
     #Fall back on the Solexa scores...
     try:
@@ -634,11 +640,11 @@ def _get_sanger_quality_str(record):
     if max(qualities) >= 93.5:
         warnings.warn("Data loss - max PHRED quality 93 in Sanger FASTQ")
     #This will apply the truncation at 93, giving max ASCII 126
-    return "".join([chr(min(126,int(round(phred_quality_from_solexa(qs)))+SANGER_SCORE_OFFSET)) \
+    return "".join([chr(min(126, int(round(phred_quality_from_solexa(qs)))+SANGER_SCORE_OFFSET)) \
                     for qs in qualities])
 
 #Only map 0 to 62, we need to give a warning on truncating at 62
-assert 62+SOLEXA_SCORE_OFFSET==126
+assert 62+SOLEXA_SCORE_OFFSET == 126
 _phred_to_illumina_quality_str = dict((qp, chr(qp+SOLEXA_SCORE_OFFSET)) \
                                       for qp in range(0, 62+1))
 #Only map -5 to 62, we need to give a warning on truncating at 62
@@ -675,7 +681,7 @@ def _get_illumina_quality_str(record):
         if max(qualities) >= 62.5:
             warnings.warn("Data loss - max PHRED quality 62 in Illumina FASTQ")
         #This will apply the truncation at 62, giving max ASCII 126
-        return "".join([chr(min(126,int(round(qp))+SOLEXA_SCORE_OFFSET)) \
+        return "".join([chr(min(126, int(round(qp))+SOLEXA_SCORE_OFFSET)) \
                         for qp in qualities])
     #Fall back on the Solexa scores...
     try:
@@ -698,16 +704,16 @@ def _get_illumina_quality_str(record):
     if max(qualities) >= 62.5:
         warnings.warn("Data loss - max PHRED quality 62 in Illumina FASTQ")
     #This will apply the truncation at 62, giving max ASCII 126
-    return "".join([chr(min(126,int(round(phred_quality_from_solexa(qs)))+SOLEXA_SCORE_OFFSET)) \
+    return "".join([chr(min(126, int(round(phred_quality_from_solexa(qs)))+SOLEXA_SCORE_OFFSET)) \
                     for qs in qualities])
 
 #Only map 0 to 62, we need to give a warning on truncating at 62
-assert 62+SOLEXA_SCORE_OFFSET==126
-_solexa_to_solexa_quality_str = dict((qs, chr(min(126,qs+SOLEXA_SCORE_OFFSET))) \
+assert 62+SOLEXA_SCORE_OFFSET == 126
+_solexa_to_solexa_quality_str = dict((qs, chr(min(126, qs+SOLEXA_SCORE_OFFSET))) \
                                      for qs in range(-5, 62+1))
 #Only map -5 to 62, we need to give a warning on truncating at 62
 _phred_to_solexa_quality_str = dict(\
-    (qp, chr(min(126,int(round(solexa_quality_from_phred(qp)))+SOLEXA_SCORE_OFFSET))) \
+    (qp, chr(min(126, int(round(solexa_quality_from_phred(qp)))+SOLEXA_SCORE_OFFSET))) \
     for qp in range(0, 62+1))
 def _get_solexa_quality_str(record):
     """Returns a Solexa FASTQ encoded quality string (PRIVATE).
@@ -739,7 +745,7 @@ def _get_solexa_quality_str(record):
         if max(qualities) >= 62.5:
             warnings.warn("Data loss - max Solexa quality 62 in Solexa FASTQ")
         #This will apply the truncation at 62, giving max ASCII 126
-        return "".join([chr(min(126,int(round(qs))+SOLEXA_SCORE_OFFSET)) \
+        return "".join([chr(min(126, int(round(qs))+SOLEXA_SCORE_OFFSET)) \
                         for qs in qualities])
     #Fall back on the PHRED scores...
     try:
@@ -871,7 +877,7 @@ def FastqGeneralIterator(handle):
             break
 
     while True:
-        if line[0]!="@":
+        if line[0] != "@":
             raise ValueError("Records in Fastq files should start with '@' character")
         title_line = line[1:].rstrip()
         #Will now be at least one line of quality data - in most FASTQ files
@@ -997,7 +1003,7 @@ def FastqPhredIterator(handle, alphabet = single_letter_alphabet, title2ids = No
     #
     #Precomputing is faster, perhaps partly by avoiding the subtractions.
     q_mapping = dict()
-    for letter in range(0,255):
+    for letter in range(0, 255):
         q_mapping[chr(letter)] = letter-SANGER_SCORE_OFFSET
     for title_line, seq_string, quality_string in FastqGeneralIterator(handle):
         if title2ids:
@@ -1159,7 +1165,7 @@ def FastqSolexaIterator(handle, alphabet = single_letter_alphabet, title2ids = N
     equivalent PHRED score (e.g. -5 to 1 as shown earlier).
     """
     q_mapping = dict()
-    for letter in range(0,255):
+    for letter in range(0, 255):
         q_mapping[chr(letter)] = letter-SOLEXA_SCORE_OFFSET
     for title_line, seq_string, quality_string in FastqGeneralIterator(handle):
         if title2ids:
@@ -1208,7 +1214,7 @@ def FastqIlluminaIterator(handle, alphabet = single_letter_alphabet, title2ids =
     NOTE - True Sanger style FASTQ files use PHRED scores with an offset of 33.
     """
     q_mapping = dict()
-    for letter in range(0,255):
+    for letter in range(0, 255):
         q_mapping[chr(letter)] = letter-SOLEXA_SCORE_OFFSET
     for title_line, seq_string, quality_string in FastqGeneralIterator(handle):
         if title2ids:
@@ -1302,7 +1308,7 @@ def QualPhredIterator(handle, alphabet = single_letter_alphabet, title2ids = Non
             break
 
     while True:
-        if line[0]!=">":
+        if line[0] != ">":
             raise ValueError("Records in Fasta files should start with '>' character")
         if title2ids:
             id, name, descr = title2ids(line[1:].rstrip())
@@ -1402,7 +1408,7 @@ class FastqPhredWriter(SequentialSequenceWriter):
         #(at least, this is what the NCBI Short Read Archive does)
         id = self.clean(record.id)
         description = self.clean(record.description)
-        if description and description.split(None,1)[0]==id:
+        if description and description.split(None, 1)[0]==id:
             #The description includes the id at the start
             title = description
         elif description:
@@ -1469,11 +1475,11 @@ class QualPhredWriter(SequentialSequenceWriter):
         self._record_written = True
 
         if self.record2title:
-            title=self.clean(self.record2title(record))
+            title = self.clean(self.record2title(record))
         else:
             id = self.clean(record.id)
             description = self.clean(record.description)
-            if description and description.split(None,1)[0]==id:
+            if description and description.split(None, 1)[0]==id:
                 #The description includes the id at the start
                 title = description
             elif description:
@@ -1486,7 +1492,7 @@ class QualPhredWriter(SequentialSequenceWriter):
         try:
             #This rounds to the nearest integer.
             #TODO - can we record a float in a qual file?
-            qualities_strs = [("%i" % round(q,0)) for q in qualities]
+            qualities_strs = [("%i" % round(q, 0)) for q in qualities]
         except TypeError, e:
             if None in qualities:
                 raise TypeError("A quality value of None was found")
@@ -1495,7 +1501,7 @@ class QualPhredWriter(SequentialSequenceWriter):
 
         if self.wrap:
             while qualities_strs:
-                line=qualities_strs.pop(0)
+                line = qualities_strs.pop(0)
                 while qualities_strs \
                 and len(line) + 1 + len(qualities_strs[0]) < self.wrap:
                     line += " " + qualities_strs.pop(0)
@@ -1572,7 +1578,7 @@ class FastqSolexaWriter(SequentialSequenceWriter):
         #(at least, this is what the NCBI Short Read Archive does)
         id = self.clean(record.id)
         description = self.clean(record.description)
-        if description and description.split(None,1)[0]==id:
+        if description and description.split(None, 1)[0]==id:
             #The description includes the id at the start
             title = description
         elif description:
@@ -1627,7 +1633,7 @@ class FastqIlluminaWriter(SequentialSequenceWriter):
         #(at least, this is what the NCBI Short Read Archive does)
         id = self.clean(record.id)
         description = self.clean(record.description)
-        if description and description.split(None,1)[0]==id:
+        if description and description.split(None, 1)[0]==id:
             #The description includes the id at the start
             title = description
         elif description:
@@ -1744,10 +1750,10 @@ def _test():
     """
     import doctest
     import os
-    if os.path.isdir(os.path.join("..","..","Tests")):
+    if os.path.isdir(os.path.join("..", "..", "Tests")):
         print "Runing doctests..."
         cur_dir = os.path.abspath(os.curdir)
-        os.chdir(os.path.join("..","..","Tests"))
+        os.chdir(os.path.join("..", "..", "Tests"))
         assert os.path.isfile("Quality/example.fastq")
         assert os.path.isfile("Quality/example.fasta")
         assert os.path.isfile("Quality/example.qual")

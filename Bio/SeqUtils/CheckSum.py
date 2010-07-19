@@ -1,4 +1,5 @@
 # Copyright 2002 by Yves Bastide and Brad Chapman.
+# Copyright 2007 by Sebastian Bassi
 # All rights reserved.
 # This code is part of the Biopython distribution and governed by its
 # license.  Please see the LICENSE file that should have been included
@@ -12,7 +13,7 @@
 from binascii import crc32 as _crc32
 
 def crc32(seq):
-    """Returns the crc32 checksum for a sequence (string or Seq object)"""
+    """Returns the crc32 checksum for a sequence (string or Seq object)."""
     try:
         #Assume its a Seq object
         return _crc32(seq.tostring())
@@ -38,7 +39,7 @@ def _init_table_h():
 _table_h = _init_table_h()
 
 def crc64(s):
-    """Returns the crc64 checksum for a sequence (string or Seq object)"""
+    """Returns the crc64 checksum for a sequence (string or Seq object)."""
     crcl = 0
     crch = 0
     for c in s:
@@ -53,7 +54,7 @@ def crc64(s):
 
 
 def gcg(seq):
-    """Returns the GCG checksum (int) for a sequence (string or Seq object)
+    """Returns the GCG checksum (int) for a sequence (string or Seq object).
 
     Given a nucleotide or amino-acid secuence (or any string),
     returns the GCG checksum (int). Checksum used by GCG program.
@@ -61,9 +62,13 @@ def gcg(seq):
     Based on BioPerl GCG_checksum. Adapted by Sebastian Bassi
     with the help of John Lenton, Pablo Ziliani, and Gabriel Genellina.
     All sequences are converted to uppercase """
+    try:
+        #Assume its a Seq object
+        seq = seq.tostring()
+    except AttributeError:
+        #Assume its a string
+        pass
     index = checksum = 0
-    if type(seq)!=type("aa"):
-        seq=seq.tostring()
     for char in seq:
         index += 1
         checksum += index * ord(char.upper())
@@ -71,7 +76,7 @@ def gcg(seq):
     return checksum % 10000
 
 def seguid(seq):
-    """Returns the SEGUID (string) for a sequence (string or Seq object)
+    """Returns the SEGUID (string) for a sequence (string or Seq object).
     
     Given a nucleotide or amino-acid secuence (or any string),
     returns the SEGUID string (A SEquence Globally Unique IDentifier).
@@ -88,13 +93,20 @@ def seguid(seq):
         import sha
         m = sha.new()
     import base64
-    if type(seq)!=type("aa"):
-        seq=seq.tostring().upper()
-    else:
-        seq=seq.upper()
-    m.update(seq)
     try:
-        #For Python 2.5
+        #Assume its a Seq object
+         seq = seq.tostring()
+    except AttributeError:
+        #Assume its a string
+        pass
+    m.update(seq.upper().encode())
+    try:
+        #For Python 3+
+        return base64.encodebytes(m.digest()).decode().replace("\n","").rstrip("=")
+    except AttributeError:
+        pass
+    try:
+        #For Python 2.5+
         return base64.b64encode(m.digest()).rstrip("=")
     except:
         #For older versions

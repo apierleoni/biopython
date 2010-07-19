@@ -23,13 +23,18 @@ from Bio.Data import IUPACData, CodonTable
 # {{{ 
 
 def reverse(seq):
-    """Reverse the sequence. Works on string sequences.
+    """Reverse the sequence. Works on string sequences (DEPRECATED).
 
-    e.g.
-    >>> reverse("ACGGT")
+    This function is now deprecated, instead use the string's built in slice
+    method with a step of minus one:
+
+    >>> "ACGGT"[::-1]
     'TGGCA'
-    
     """
+    import warnings
+    warnings.warn("Bio.SeqUtils.reverse() is deprecated, use the string's "
+                  "slice method with a step of minus one instead.",
+                  DeprecationWarning)
     r = list(seq)
     r.reverse()
     return ''.join(r)
@@ -216,13 +221,18 @@ def nt_search(seq, subseq):
 # should be moved to ???
 
 class ProteinX(Alphabet.ProteinAlphabet):
+    """Variant of the extended IUPAC extended protein alphabet (DEPRECATED)."""
     letters = IUPACData.extended_protein_letters + "X"
 
+#Can't add a deprecation warning to the class due to the following line:
 proteinX = ProteinX()
 
 class MissingTable:
     def __init__(self, table):
         self._table = table
+        import warnings
+        warnings.warn("Function Bio.SeqUtils.makeTableX() and related classes ProteinX "
+                      "and MissingTable are deprecated.", DeprecationWarning)
     def get(self, codon, stop_symbol):
         try:
             return self._table.get(codon, stop_symbol)
@@ -341,32 +351,32 @@ def six_frame_translations(seq, genetic_code = 1):
 ######################
 # {{{ 
 
-def fasta_uniqids(file):
+def fasta_uniqids(filename):
     """Checks and changes the name/ID's to be unique identifiers by adding numbers (OBSOLETE).
 
     file - a FASTA format filename to read in.
 
     No return value, the output is written to screen.
     """
-    dict = {}
-    txt = open(file).read()
+    mydict = {}
+    txt = open(filename).read()
     entries = []
     for entry in txt.split('>')[1:]:
         name, seq= entry.split('\n',1)
         name = name.split()[0].split(',')[0]
       
-        if name in dict:
+        if name in mydict:
             n = 1
             while 1:
                 n = n + 1
                 _name = name + str(n)
-                if _name not in dict:
+                if _name not in mydict:
                     name = _name
                     break
             
-        dict[name] = seq
+        mydict[name] = seq
 
-    for name, seq in dict.items():
+    for name, seq in mydict.iteritems():
         print '>%s\n%s' % (name, seq)
 
 def quick_FASTA_reader(file):
@@ -463,7 +473,7 @@ def quicker_apply_on_multi_fasta(file, function, *args):
         result = f(*arguments)
         if result:
             results.append('>%s\n%s' % (name, result))
-    handle.close()
+    file.close()
     return results
 
 # }}}

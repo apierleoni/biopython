@@ -12,7 +12,6 @@ Notredame, Higgins, Heringa, JMB,302(205-217) 2000
 Last checked against: Version_6.92
 """
 
-import types
 from Bio.Application import _Option, _Switch, _Argument, AbstractCommandline
 
 class TCoffeeCommandline(AbstractCommandline):
@@ -47,8 +46,8 @@ class TCoffeeCommandline(AbstractCommandline):
                     0),
            _Switch(["-convert", "convert"], ["input"],
                     "Specify you want to perform a file conversion"),
-           _Option(["-type"], ["input"],
-                    lambda x: x in SEQ_TYPES,
+           _Option(["-type", "type"], ["input"],
+                    lambda x: x in self.SEQ_TYPES,
                     0,
                     "Specify the type of sequence being aligned",
                     0),
@@ -66,13 +65,13 @@ class TCoffeeCommandline(AbstractCommandline):
                     "Default: blosum62mt",
                     0),
            _Option(["-gapopen", "gapopen"], ["input"],
-                    lambda x: isinstance(x, types.IntType),
+                    lambda x: isinstance(x, int),
                     0,
                     "Indicates the penalty applied for opening a gap "
                     "(negative integer)",
                     0),
            _Option(["-gapext", "gapext"], ["input"],
-                    lambda x: isinstance(x, types.IntType),
+                    lambda x: isinstance(x, int),
                     0,
                     "Indicates the penalty applied for extending a "
                     "gap. (negative integer)",

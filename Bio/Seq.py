@@ -41,7 +41,10 @@ def _maketrans(complement_mapping):
     after  = ''.join(complement_mapping.values())
     before = before + before.lower()
     after  = after + after.lower()
-    return string.maketrans(before, after)
+    if sys.version_info[0] == 3 :
+        return str.maketrans(before, after)
+    else:
+        return string.maketrans(before, after)
 
 _dna_complement_table = _maketrans(ambiguous_dna_complement)
 _rna_complement_table = _maketrans(ambiguous_rna_complement)
@@ -139,9 +142,47 @@ class Seq(object):
         """
         return self._data
 
-    # TODO - Alphabet aware __eq__ etc would be nice, but has implications for
-    # __hash__ and therefore use as dictionary keys. See also:
-    # http://mail.python.org/pipermail/python-dev/2002-December/031455.html
+
+    def __hash__(self):
+        """Hash for comparison.
+
+        See the __cmp__ documentation - we plan to change this!
+        """
+        return id(self) #Currently use object identity for equality testing
+    
+    def __cmp__(self, other):
+        """Compare the sequence to another sequence or a string (README).
+
+        Historically comparing Seq objects has done Python object comparison.
+        After considerable discussion (keeping in mind constraints of the
+        Python language, hashes and dictionary support) a future release of
+        Biopython will change this to use simple string comparison. The plan is
+        that comparing incompatible alphabets (e.g. DNA to RNA) will trigger a
+        warning.
+
+        This version of Biopython still does Python object comparison, but with
+        a warning about this future change. During this transition period,
+        please just do explicit comparisons:
+
+        >>> seq1 = Seq("ACGT")
+        >>> seq2 = Seq("ACGT")
+        >>> id(seq1) == id(seq2)
+        False
+        >>> str(seq1) == str(seq2)
+        True
+
+        Note - This method indirectly supports ==, < , etc.
+        """
+        if hasattr(other, "alphabet"):
+            #other should be a Seq or a MutableSeq
+            import warnings
+            warnings.warn("In future comparing Seq objects will use string "
+                          "comparison (not object comparison). Incompatible "
+                          "alphabets will trigger a warning (not an exception). "
+                          "In the interim please use id(seq1)==id(seq2) or "
+                          "str(seq1)==str(seq2) to make your code explicit "
+                          "and to avoid this warning.", FutureWarning)
+        return cmp(id(self), id(other))
 
     def __len__(self):
         """Returns the length of the sequence, use len(my_seq)."""
@@ -1416,8 +1457,12 @@ class MutableSeq(object):
     or biological methods as the Seq object.
     """
     def __init__(self, data, alphabet = Alphabet.generic_alphabet):
+        if sys.version_info[0] == 3:
+            self.array_indicator = "u"
+        else:
+            self.array_indicator = "c"
         if type(data) == type(""):
-            self.data = array.array("c", data)
+            self.data = array.array(self.array_indicator, data)
         else:
             self.data = data   # assumes the input is an array
         self.alphabet = alphabet
@@ -1448,18 +1493,37 @@ class MutableSeq(object):
         return "".join(self.data)
 
     def __cmp__(self, other):
-        """Compare the sequence for to another sequence or a string.
+        """Compare the sequence to another sequence or a string (README).
 
-        If compared to another sequence the alphabets must be compatible.
-        Comparing DNA to RNA, or Nucleotide to Protein will raise an
-        exception.
+        Currently if compared to another sequence the alphabets must be
+        compatible. Comparing DNA to RNA, or Nucleotide to Protein will raise
+        an exception. Otherwise only the sequence itself is compared, not the
+        precise alphabet.
 
-        Otherwise only the sequence itself is compared, not the precise
-        alphabet.
+        A future release of Biopython will change this (and the Seq object etc)
+        to use simple string comparison. The plan is that comparing sequences
+        with incompatible alphabets (e.g. DNA to RNA) will trigger a warning
+        but not an exception.
 
-        This method indirectly supports ==, < , etc."""
+        During this transition period, please just do explicit comparisons:
+
+        >>> seq1 = MutableSeq("ACGT")
+        >>> seq2 = MutableSeq("ACGT")
+        >>> id(seq1) == id(seq2)
+        False
+        >>> str(seq1) == str(seq2)
+        True
+
+        This method indirectly supports ==, < , etc.
+        """
         if hasattr(other, "alphabet"):
             #other should be a Seq or a MutableSeq
+            import warnings
+            warnings.warn("In future comparing incompatible alphabets will "
+                          "only trigger a warning (not an exception). In " 
+                          "the interim please use id(seq1)==id(seq2) or "
+                          "str(seq1)==str(seq2) to make your code explicit "
+                          "and to avoid this warning.", FutureWarning)
             if not Alphabet._check_type_compatible([self.alphabet,
                                                     other.alphabet]):
                 raise TypeError("Incompatable alphabets %s and %s" \
@@ -1503,7 +1567,8 @@ class MutableSeq(object):
             elif isinstance(value, type(self.data)):
                 self.data[index] = value
             else:
-                self.data[index] = array.array("c", str(value))
+                self.data[index] = array.array(self.array_indicator,
+                                               str(value))
 
     def __delitem__(self, index):
         #Note since Python 2.0, __delslice__ is deprecated
@@ -1672,7 +1737,7 @@ class MutableSeq(object):
         c = dict([(x.lower(), y.lower()) for x,y in d.iteritems()])
         d.update(c)
         self.data = map(lambda c: d[c], self.data)
-        self.data = array.array('c', self.data)
+        self.data = array.array(self.array_indicator, self.data)
         
     def reverse_complement(self):
         """Modify the mutable sequence to take on its reverse complement.
@@ -1717,8 +1782,8 @@ class MutableSeq(object):
 
         >>> from Bio.Seq import Seq
         >>> from Bio.Alphabet import IUPAC
-        >>> my_mseq = MutableSeq("MKQHKAMIVALIVICITAVVAAL", \
-                                 IUPAC.protein)
+        >>> my_mseq = MutableSeq("MKQHKAMIVALIVICITAVVAAL", 
+        ...                      IUPAC.protein)
         >>> my_mseq
         MutableSeq('MKQHKAMIVALIVICITAVVAAL', IUPACProtein())
         >>> my_mseq.toseq()

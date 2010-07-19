@@ -53,14 +53,14 @@ class SinglePointTest(unittest.TestCase):
         
         new_org_1, new_org_2 = self.crossover.do_crossover(self.org_1,
                                                            self.org_2)
-        self.assertNotEqual(new_org_1.genome, start_genome_1,
+        self.assertNotEqual(str(new_org_1.genome), str(start_genome_1),
                             "Did not perform a crossover when expected.")
-        self.assertNotEqual(new_org_2.genome, start_genome_2,
+        self.assertNotEqual(str(new_org_2.genome), str(start_genome_2),
                             "Did not perform a crossover when expected.")
         
-        self.assertNotEqual(new_org_1, self.org_1,
+        self.assertNotEqual(str(new_org_1), str(self.org_1),
                             "Returned an exact copy of the original organism.")
-        self.assertNotEqual(new_org_2, self.org_2,
+        self.assertNotEqual(str(new_org_2), str(self.org_2),
                             "Returned an exact copy of the original organism.")
 
 class UniformTest(unittest.TestCase):
@@ -88,14 +88,14 @@ class UniformTest(unittest.TestCase):
         new_org_1, new_org_2 = self.crossover.do_crossover(self.org_1,
                                                            self.org_2)
 
-        self.assertNotEqual(new_org_1.genome, start_genome_1,
+        self.assertNotEqual(str(new_org_1.genome), str(start_genome_1),
                             "Did not perform a crossover when expected.")
-        self.assertNotEqual(new_org_2.genome, start_genome_2,
+        self.assertNotEqual(str(new_org_2.genome), str(start_genome_2),
                             "Did not perform a crossover when expected.")
     
-        self.assertNotEqual(new_org_1, self.org_1,
+        self.assertNotEqual(str(new_org_1), str(self.org_1),
                             "Returned an exact copy of the original organism.")
-        self.assertNotEqual(new_org_2, self.org_2,
+        self.assertNotEqual(str(new_org_2), str(self.org_2),
                             "Returned an exact copy of the original organism.")
 
     def test_ds_prop_uniform_crossover(self):
@@ -105,15 +105,15 @@ class UniformTest(unittest.TestCase):
                                                            self.org_3)
 
 
-        self.assert_(len(new_org_1.genome) > len(new_org_2.genome),
+        self.assertTrue(len(new_org_1.genome) > len(new_org_2.genome),
                      "Strings are of wrong sizes after uniform crossover.")
 
         self.assertEqual(new_org_2.genome.tostring().count("1"),
                          new_org_1.genome.tostring().count("3"),
                          "There should be equal distributions of the smaller string")
 
-        self.assertEqual(self.org_1.genome[len(new_org_2.genome):],
-                         new_org_1.genome[len(new_org_2.genome):],
+        self.assertEqual(str(self.org_1.genome[len(new_org_2.genome):]),
+                         str(new_org_1.genome[len(new_org_2.genome):]),
                          "Uniform should not touch non-overlapping elements of genome")
     
     def test_ss_prop_uniform_crossover(self):
@@ -158,14 +158,14 @@ class InterleaveTest(unittest.TestCase):
         new_org_1, new_org_2 = self._crossover.do_crossover(self.org_1,
                                                             self.org_2)
 
-        self.assertNotEqual(new_org_1.genome, start_genome_1,
+        self.assertNotEqual(str(new_org_1.genome), str(start_genome_1),
                             "Did not perform a crossover when expected.")
-        self.assertNotEqual(new_org_2.genome, start_genome_2,
+        self.assertNotEqual(str(new_org_2.genome), str(start_genome_2),
                             "Did not perform a crossover when expected.")
 
-        self.assertNotEqual(new_org_1, self.org_1,
+        self.assertNotEqual(str(new_org_1), str(self.org_1),
                             "Returned an exact copy of the original organism.")
-        self.assertNotEqual(new_org_2, self.org_2,
+        self.assertNotEqual(str(new_org_2), str(self.org_2),
                             "Returned an exact copy of the original organism.")
        
     def test_prop_sym_crossover(self):
@@ -196,14 +196,14 @@ class InterleaveTest(unittest.TestCase):
         new_org_1, new_org_3 = self._crossover.do_crossover(self.org_1,
                                                             self.org_3)
 
-        self.assertNotEqual(new_org_1.genome, start_genome_1,
+        self.assertNotEqual(str(new_org_1.genome), str(start_genome_1),
                             "Did not perform a crossover when expected.")
-        self.assertNotEqual(new_org_3.genome, start_genome_3,
+        self.assertNotEqual(str(new_org_3.genome), str(start_genome_3),
                             "Did not perform a crossover when expected.")
 
-        self.assertNotEqual(new_org_1, self.org_1,
+        self.assertNotEqual(str(new_org_1), str(self.org_1),
                             "Returned an exact copy of the original organism.")
-        self.assertNotEqual(new_org_3, self.org_3,
+        self.assertNotEqual(str(new_org_3), str(self.org_3),
                             "Returned an exact copy of the original organism.")
 
         self.assertEqual(new_org_1.genome.tostring(), "13131",
@@ -234,14 +234,14 @@ class FourPointTest(unittest.TestCase):
         new_org_1, new_org_2 = self.sym_crossover.do_crossover(self.org_1,
                                                                self.org_2)
 
-        self.assertNotEqual(new_org_1.genome, start_genome_1,
+        self.assertNotEqual(str(new_org_1.genome), str(start_genome_1),
                             "Did not perform a crossover when expected.")
-        self.assertNotEqual(new_org_2.genome, start_genome_2,
+        self.assertNotEqual(str(new_org_2.genome), str(start_genome_2),
                             "Did not perform a crossover when expected.")
 
-        self.assertNotEqual(new_org_1, self.org_1,
+        self.assertNotEqual(str(new_org_1), str(self.org_1),
                             "Returned an exact copy of the original organism.")
-        self.assertNotEqual(new_org_2, self.org_2,
+        self.assertNotEqual(str(new_org_2), str(self.org_2),
                             "Returned an exact copy of the original organism.")
                
     def test_prop_sym_crossover(self):
@@ -269,14 +269,14 @@ class FourPointTest(unittest.TestCase):
         new_org_1, new_org_2 = self.asym_crossover.do_crossover(self.org_1,
                                                                 self.org_2)
 
-        self.assertNotEqual(new_org_1.genome, start_genome_1,
+        self.assertNotEqual(str(new_org_1.genome), str(start_genome_1),
                             "Did not perform a crossover when expected.")
-        self.assertNotEqual(new_org_2.genome, start_genome_2,
+        self.assertNotEqual(str(new_org_2.genome), str(start_genome_2),
                             "Did not perform a crossover when expected.")
 
-        self.assertNotEqual(new_org_1, self.org_1,
+        self.assertNotEqual(str(new_org_1), str(self.org_1),
                             "Returned an exact copy of the original organism.")
-        self.assertNotEqual(new_org_2, self.org_2,
+        self.assertNotEqual(str(new_org_2), str(self.org_2),
                             "Returned an exact copy of the original organism.")
     
     
@@ -302,14 +302,14 @@ class TwoPointTest(unittest.TestCase):
         new_org_1, new_org_2 = self.asym_crossover.do_crossover(self.org_1,
                                                                 self.org_2)
 
-        self.assertNotEqual(new_org_1.genome, start_genome_1,
+        self.assertNotEqual(str(new_org_1.genome), str(start_genome_1),
                             "Did not perform a crossover when expected.")
-        self.assertNotEqual(new_org_2.genome, start_genome_2,
+        self.assertNotEqual(str(new_org_2.genome), str(start_genome_2),
                             "Did not perform a crossover when expected.")
 
-        self.assertNotEqual(new_org_1, self.org_1,
+        self.assertNotEqual(str(new_org_1), str(self.org_1),
                             "Returned an exact copy of the original organism.")
-        self.assertNotEqual(new_org_2, self.org_2,
+        self.assertNotEqual(str(new_org_2), str(self.org_2),
                             "Returned an exact copy of the original organism.")
 
     
@@ -374,25 +374,23 @@ class SafeFitnessTest(unittest.TestCase):
         self.test_crossover.type = "same"
         new_org_1, new_org_2 = crossover.do_crossover(self.org_1, self.org_2)
 
-        #TODO - Do we really want object identity here?
-        self.assertEqual(new_org_1, self.org_1,
+        self.assertEqual(str(new_org_1), str(self.org_1),
                          "Did not retain organism for same fitness.")
-        self.assertEqual(new_org_2, self.org_2,
+        self.assertEqual(str(new_org_2), str(self.org_2),
                          "Did not retain organism for same fitness.")
 
         self.test_crossover.type = "lower"
         new_org_1, new_org_2 = crossover.do_crossover(self.org_1, self.org_2)
 
-        #TODO - Do we really want object identity here?
-        self.assertEqual(new_org_1, self.org_1,
+        self.assertEqual(str(new_org_1), str(self.org_1),
                          "Did not retain organism when crossover had lower fitness.")
-        self.assertEqual(new_org_2, self.org_2,
+        self.assertEqual(str(new_org_2), str(self.org_2),
                          "Did not retain organism when crossover had lower fitness.")
 
         self.test_crossover.type = "higher"
         new_org_1, new_org_2 = crossover.do_crossover(self.org_1, self.org_2)
 
-        self.assert_(new_org_1.fitness > self.org_1.fitness and \
+        self.assertTrue(new_org_1.fitness > self.org_1.fitness and \
                      new_org_2.fitness > self.org_2.fitness,
                      "Did not get new organism when it had higher fitness.")
 
@@ -404,25 +402,23 @@ class SafeFitnessTest(unittest.TestCase):
         self.test_crossover.type = "same"
         new_org_1, new_org_2 = crossover.do_crossover(self.org_1, self.org_2)
 
-        #TODO - Do we really want object identity here?
-        self.assertEqual(new_org_1, self.org_1,
+        self.assertEqual(str(new_org_1), str(self.org_1),
                          "Did not retain organism for same fitness.")
-        self.assertEqual(new_org_2, self.org_2,
+        self.assertEqual(str(new_org_2), str(self.org_2),
                          "Did not retain organism for same fitness.")
 
         self.test_crossover.type = "lower"
         new_org_1, new_org_2 = crossover.do_crossover(self.org_1, self.org_2)
 
-        #TODO - Do we really want object identity here?
-        self.assertNotEqual(new_org_1, self.org_1,
+        self.assertNotEqual(str(new_org_1), str(self.org_1),
                          "Retained lower fitness organism in crossover.")
-        self.assertNotEqual(new_org_2, self.org_2,
+        self.assertNotEqual(str(new_org_2), str(self.org_2),
                          "Retained lower fitness organism in crossover.")
         
         self.test_crossover.type = "higher"
         new_org_1, new_org_2 = crossover.do_crossover(self.org_1, self.org_2)
 
-        self.assert_(new_org_1.fitness > self.org_1.fitness and \
+        self.assertTrue(new_org_1.fitness > self.org_1.fitness and \
                      new_org_2.fitness > self.org_2.fitness,
                      "Did not get new organism under higher fitness conditions.")
 

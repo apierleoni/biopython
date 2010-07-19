@@ -54,10 +54,11 @@ class ProbconsApplication(unittest.TestCase):
         child = subprocess.Popen(str(cmdline),
                                  stdout=subprocess.PIPE,
                                  stderr=subprocess.PIPE,
+                                 universal_newlines=True,
                                  shell=(sys.platform!="win32"))
         return_code = child.wait()
         self.assertEqual(return_code, 0)
-        self.assert_(child.stderr.read().strip().startswith("PROGRAM: T-COFFEE"))
+        self.assertTrue(child.stderr.read().strip().startswith("PROGRAM: T-COFFEE"))
         align = AlignIO.read(open(self.outfile1), "clustal")
         records = list(SeqIO.parse(open(self.infile1),"fasta"))
         self.assertEqual(len(records),len(align))
@@ -78,10 +79,11 @@ class ProbconsApplication(unittest.TestCase):
         child = subprocess.Popen(str(cmdline),
                                  stdout=subprocess.PIPE,
                                  stderr=subprocess.PIPE,
+                                 universal_newlines=True,
                                  shell=(sys.platform!="win32"))
         return_code = child.wait()
         self.assertEqual(return_code, 0)
-        self.assertEquals(child.stderr.read(), "")
+        self.assertEqual(child.stderr.read(), "")
         align = AlignIO.read(open(self.outfile3), "pir")
         records = list(SeqIO.parse(open(self.infile1),"fasta"))
         self.assertEqual(len(records),len(align))
@@ -102,14 +104,15 @@ class ProbconsApplication(unittest.TestCase):
         cmdline.type = "protein"
         self.assertEqual(str(cmdline), t_coffee_exe + " -output clustalw_aln "
                          "-infile Fasta/fa01 -outfile Fasta/tc_out.phy "
-                         "-outorder input -gapopen -2 -gapext -5")
+                         "-type protein -outorder input -gapopen -2 -gapext -5")
         child = subprocess.Popen(str(cmdline),
                                  stdout=subprocess.PIPE,
                                  stderr=subprocess.PIPE,
+                                 universal_newlines=True,
                                  shell=(sys.platform!="win32"))
         return_code = child.wait()
         self.assertEqual(return_code, 0)
-        self.assert_(child.stderr.read().strip().startswith("PROGRAM: T-COFFEE"))
+        self.assertTrue(child.stderr.read().strip().startswith("PROGRAM: T-COFFEE"))
         align = AlignIO.read(open(self.outfile4), "clustal")
         records = list(SeqIO.parse(open(self.infile1),"fasta"))
         self.assertEqual(len(records),len(align))
