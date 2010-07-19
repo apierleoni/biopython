@@ -316,7 +316,6 @@ class Parser():
                                         if pair[1]!='-':
                                             feature=SeqFeature.SeqFeature()
                                             feature.type=element.attrib['type']
-                                            #feature.id=element.attrib['id']
                                             feature.qualifiers['name']=element.attrib['id']
                                             feature.qualifiers['method']=method
                                             feature.qualifiers['resolution']=resolution
@@ -325,9 +324,7 @@ class Parser():
                                             end=int(pair[1].split('-')[1])-1
                                             feature.location=SeqFeature.FeatureLocation(start,end)
                                             self.ParsedSeqRecord.features.append(feature)
-         
-                                            
-            
+
             for ref_element in  element.getchildren():  
                 if ref_element.tag==NS + 'property':
                     pass# this data cannot be fitted in a seqrecord object with a simple list. however at least ensembl and EMBL parsing can be improved to add entries in dbxrefs
