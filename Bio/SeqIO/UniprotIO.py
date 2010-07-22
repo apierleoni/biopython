@@ -11,7 +11,7 @@ See also:
 
 http://www.uniprot.org
 """
-import copy
+import sys
 
 from Bio import Seq
 from Bio import SeqFeature
@@ -23,7 +23,11 @@ except ImportError:
     from StringIO import StringIO
 import warnings
 try:
-    from xml.etree import cElementTree as ElementTree
+    if (3,0,0) <= sys.version_info < (3,1,2):
+        #workaround for bug in python 3 to 3.1.2  see http://bugs.python.org/issue9257
+        from xml.etree import ElementTree as ElementTree
+    else:
+        from xml.etree import cElementTree as ElementTree
 except ImportError:
     try:
         from xml.etree import ElementTree as ElementTree
