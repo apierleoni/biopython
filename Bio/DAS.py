@@ -14,8 +14,8 @@ TEST CODE
 
 ::
 
-    >>> from Bio.DAS.DASpy import DASpy 
-    >>> das = DASpy() # fetch alla available servers form DASregistry
+    >>> from Bio.DAS import DASregistry 
+    >>> das = DASregistry() # fetch alla available servers form DASregistry
     >>> server = das.das_servers['transmem_pred'] # choose a server
     >>> params = dict(segment = 'P50225') # set request parameters in a dictionary
     >>> results = server.fetch('das1:features', params) # fetch results
@@ -77,8 +77,8 @@ TEST CODE
     
     #retrieve all available features given a uniprot ID and build a seqrecord
     
-    >>> from Bio.DAS.DASpy import DASpy
-    >>> das = DASpy()
+    >>> from Bio.DAS import DASregistry
+    >>> das = DASregistry()
     >>> seqrec = das.fetch_to_seqrec(id = 'P00280',  
     ...                             coord_server = das.das_servers['uniprot'], 
     ...                             feat_servers = das.coords['UniProt,Protein Sequence'][:20]) # limiting to first 20 DAS servers
@@ -97,8 +97,8 @@ TEST CODE
 
 
     #fetch the sequence form a DAS server and return a Seq object
-    >>> from Bio.DAS.DASpy import DASpy
-    >>> das = DASpy()
+    >>> from Bio.DAS import DASregistry
+    >>> das = DASregistry()
     >>> server = das.das_servers['uniprot']
     >>> print server.capabs.keys()
     ['das1:types', 'das1:entry_points', 'das1:features', 'das1:stylesheet', 'das1:sequence']
@@ -109,8 +109,8 @@ TEST CODE
 
 
     #fetch the features form a DAS server
-from Bio.DAS.DASpy import DASpy    
-das = DASpy()
+from Bio.DAS import DASregistry    
+das = DASregistry()
 server = das.das_servers['uniprot']
 results = server.fetch('das1:features', dict(segment = 'P00280'))
 featobj = results[0]
@@ -677,7 +677,7 @@ class DASserver(object):
 
 
 
-class DASpy(object):
+class DASregistry(object):
     '''
     Reads sources from DASregistry and returns links to DAS servers
     '''
@@ -688,7 +688,7 @@ class DASpy(object):
         fetch all the available sources
         and returns a connection object 
         
-        >>> das = DASpy()
+        >>> das = DASregistry()
         
         with this properties:
         
